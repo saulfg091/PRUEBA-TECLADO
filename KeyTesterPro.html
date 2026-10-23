@@ -1,0 +1,2839 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KeyTester Pro - Comprobador de Teclado Premium</title>
+    <meta name="description" content="Comprueba el funcionamiento de las teclas de tu teclado en tiempo real. Soporte para distribución española (ISO) y americana (ANSI), simulación de interruptores mecánicos y diagnóstico de rollover.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* -------------------------------------------------------------
+         * KeyTester Pro - Premium Stylesheet (Embedded)
+         * ------------------------------------------------------------- */
+        :root {
+            /* Color Palette */
+            --bg-dark: #090a0f;
+            --bg-card: rgba(18, 22, 33, 0.7);
+            --bg-card-hover: rgba(26, 31, 46, 0.85);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f1f3f9;
+            --text-secondary: #8a96ab;
+            
+            /* Neon States */
+            --color-active: #00f2fe; /* Bright Cyan */
+            --color-active-glow: rgba(0, 242, 254, 0.45);
+            
+            --color-tested: #00f59b; /* Emerald Green */
+            --color-tested-glow: rgba(0, 245, 155, 0.25);
+            
+            --color-special: #a155ff; /* Purple for system/mods */
+            --color-special-glow: rgba(161, 85, 255, 0.25);
+            
+            /* Keycap Variables */
+            --key-base-bg: rgba(30, 37, 54, 0.65);
+            --key-base-border: rgba(255, 255, 255, 0.1);
+            --key-base-shadow: rgba(0, 0, 0, 0.35);
+            --key-size: 46px;
+            --key-gap: 6px;
+            
+            /* Transitions */
+            --transition-fast: 0.1s ease;
+            --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Global Reset & Scrollbars */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Stunning Glassmorphic Animated Background */
+        .glass-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(161, 85, 255, 0.07) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(0, 245, 155, 0.03) 0%, transparent 50%),
+                var(--bg-dark);
+            filter: blur(10px);
+        }
+
+        /* App Container Layout */
+        .app-container {
+            width: 100%;
+            max-width: 1400px;
+            min-height: 100vh;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        /* Header Design */
+        header {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
+            padding: 16px 28px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, var(--color-active), var(--color-special));
+            color: var(--bg-dark);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo h1 span {
+            background: linear-gradient(135deg, var(--color-active), var(--color-tested));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Controls & Selectors */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .control-group label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .control-group select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 16px;
+            border-radius: 10px;
+            outline: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition-normal);
+        }
+
+        .control-group select:hover, .control-group select:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(0, 242, 254, 0.3);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.1);
+        }
+
+        .control-group select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        /* Button Styling */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition-normal);
+            outline: none;
+        }
+
+        .btn-danger {
+            background: rgba(255, 75, 75, 0.15);
+            border: 1px solid rgba(255, 75, 75, 0.3);
+            color: #ff5c5c;
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 75, 75, 0.3);
+            box-shadow: 0 0 15px rgba(255, 75, 75, 0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+
+        /* Workspace Area */
+        .workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        /* Keyboard Section Container */
+        .keyboard-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .keyboard-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: fit-content;
+        }
+
+        /* The Virtual Keyboard Core Layout */
+        .keyboard {
+            display: flex;
+            gap: 16px;
+            padding: 8px;
+            border-radius: 14px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Blocks */
+        .keyboard-block {
+            display: flex;
+            flex-direction: column;
+            gap: var(--key-gap);
+        }
+
+        .block-numpad {
+            display: grid;
+            grid-template-columns: repeat(4, var(--key-size));
+            grid-template-rows: repeat(5, var(--key-size));
+            gap: var(--key-gap);
+            margin-top: calc(var(--key-size) + var(--key-gap) + 12px); /* Alinea con la fila 1 del bloque alfanumérico */
+        }
+
+        .block-numpad .key {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Keyboard layout structure */
+        .keyboard-row {
+            display: flex;
+            gap: var(--key-gap);
+        }
+
+        .row-fkeys {
+            margin-bottom: 12px;
+        }
+
+        /* Keycaps Base Style */
+        .key {
+            width: calc(var(--key-size) * var(--key-w, 1));
+            height: var(--key-size);
+            background: var(--key-base-bg);
+            border: 1px solid var(--key-base-border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 5px 7px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: default;
+            user-select: none;
+            position: relative;
+            transition: 
+                background-color var(--transition-fast), 
+                border-color var(--transition-fast), 
+                color var(--transition-fast), 
+                box-shadow var(--transition-fast),
+                transform var(--transition-fast);
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.08),
+                0 2px 4px var(--key-base-shadow);
+        }
+
+        /* Dual labels for keys with Shift characters */
+        .key-label-primary {
+            align-self: flex-start;
+        }
+
+        .key-label-secondary {
+            align-self: flex-end;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            line-height: 1;
+        }
+
+        /* Modifier/Special Keycap tweaks */
+        .key.modifier {
+            background: rgba(38, 46, 66, 0.8);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Key States (Dynamic) */
+        /* 1. Pressed State (Active) */
+        .key.active {
+            background: var(--color-active) !important;
+            border-color: var(--color-active) !important;
+            color: #05070a !important;
+            transform: translateY(2px) scale(0.96);
+            box-shadow: 
+                0 0 18px var(--color-active-glow),
+                inset 0 1px 2px rgba(255, 255, 255, 0.2);
+        }
+
+        .key.active .key-label-secondary {
+            color: rgba(5, 7, 10, 0.7);
+        }
+
+        /* 2. Tested State (Passed successfully) */
+        .key.tested {
+            background: rgba(0, 245, 155, 0.12);
+            border-color: rgba(0, 245, 155, 0.35);
+            color: var(--color-tested);
+            box-shadow: 
+                0 0 10px var(--color-tested-glow),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .key.tested .key-label-secondary {
+            color: rgba(0, 245, 155, 0.5);
+        }
+
+        /* Specific Special layout offsets */
+        .key.spacer {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        /* ISO Enter Layout simulation */
+        .key-enter-iso-top {
+            border-bottom-right-radius: 0 !important;
+        }
+        .key-enter-iso-bottom {
+            border-top: none !important;
+            border-top-left-radius: 0 !important;
+            border-top-right-radius: 0 !important;
+            height: calc(var(--key-size) + var(--key-gap) + 2px) !important;
+            margin-top: calc(-1 * (var(--key-gap) + 2px)) !important;
+            position: relative;
+            z-index: 3;
+        }
+        .key-enter-iso-bottom .key-label-primary {
+            display: none !important;
+        }
+
+        /* Dashboard Stats & Logs */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+        }
+
+        .card-header h2 {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        /* Statistics Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--color-active), var(--color-special));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Active Keys List Visualizer (Rollover Test) */
+        .active-keys-container {
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .active-keys-container h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .active-keys-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-height: 36px;
+            align-items: center;
+        }
+
+        .active-keys-list .key-tag {
+            background: rgba(0, 242, 254, 0.15);
+            border: 1px solid rgba(0, 242, 254, 0.4);
+            color: var(--color-active);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            animation: bounceIn 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .empty-list {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Historical Log Card Layout */
+        .log-table-wrapper {
+            max-height: 230px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            text-align: left;
+        }
+
+        .log-table th {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-secondary);
+            padding: 10px 12px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .log-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .log-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .empty-log {
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+            padding: 40px !important;
+        }
+
+        /* Event types in history table */
+        .log-action-down {
+            color: var(--color-active);
+            font-weight: bold;
+        }
+
+        .log-action-up {
+            color: var(--text-secondary);
+        }
+
+        /* Audio Banner Alert */
+        .audio-banner {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: rgba(161, 85, 255, 0.15);
+            border: 1px solid rgba(161, 85, 255, 0.35);
+            backdrop-filter: blur(15px);
+            padding: 14px 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            font-size: 0.85rem;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .audio-banner span {
+            color: #dfcdff;
+        }
+
+        .audio-banner button {
+            background: rgba(161, 85, 255, 0.3);
+            border: 1px solid rgba(161, 85, 255, 0.5);
+            color: #fff;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: var(--transition-normal);
+        }
+
+        .audio-banner button:hover {
+            background: rgba(161, 85, 255, 0.5);
+        }
+
+        /* Footer Style */
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* CSS Animations */
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            0% { transform: translateY(40px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Styling for specific keyboard sizes / layouts */
+        .keyboard-section::-webkit-scrollbar {
+            height: 10px;
+        }
+
+        /* Segmented Control for Mode Switching */
+        .segmented-control {
+            display: flex;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 3px;
+            margin-bottom: 16px;
+            width: 100%;
+        }
+
+        .seg-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-secondary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+
+        .seg-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .seg-btn.active {
+            background: linear-gradient(135deg, var(--color-active), var(--color-special));
+            color: var(--bg-dark);
+            box-shadow: 0 4px 10px rgba(0, 242, 254, 0.2);
+        }
+
+        /* Metadata Grid styling */
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 480px) {
+            .meta-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .meta-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: var(--transition-normal);
+        }
+
+        .meta-box:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .meta-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        .meta-val {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Status badge styles */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .badge-active {
+            background: rgba(0, 245, 155, 0.12);
+            color: var(--color-tested);
+            border: 1px solid rgba(0, 245, 155, 0.25);
+        }
+        .badge-active .badge-dot {
+            background: var(--color-tested);
+            box-shadow: 0 0 6px var(--color-tested-glow);
+            animation: pulse 1.5s infinite;
+        }
+
+        .badge-inactive {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .badge-inactive .badge-dot {
+            background: var(--text-secondary);
+        }
+
+        .badge-supported {
+            background: rgba(0, 242, 254, 0.12);
+            color: var(--color-active);
+            border: 1px solid rgba(0, 242, 254, 0.25);
+        }
+        .badge-supported .badge-dot {
+            background: var(--color-active);
+            box-shadow: 0 0 6px var(--color-active-glow);
+        }
+
+        .badge-unsupported {
+            background: rgba(255, 75, 75, 0.12);
+            color: #ff5c5c;
+            border: 1px solid rgba(255, 75, 75, 0.25);
+        }
+        .badge-unsupported .badge-dot {
+            background: #ff5c5c;
+        }
+
+        /* Mouse Tester Styles */
+        .mouse-card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .mouse-test-container {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        @media (max-width: 480px) {
+            .mouse-test-container {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+
+        .mouse-visual-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .mouse-svg {
+            width: 100%;
+            max-width: 100px;
+            height: auto;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4));
+        }
+
+        .mouse-part {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 2.5;
+            transition: fill var(--transition-fast), stroke var(--transition-fast), filter var(--transition-fast);
+        }
+
+        .mouse-body-bg {
+            fill: rgba(30, 37, 54, 0.4);
+            stroke: rgba(255, 255, 255, 0.12);
+        }
+
+        .mouse-button, .mouse-wheel, .mouse-side-button {
+            fill: rgba(255, 255, 255, 0.05);
+            stroke: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Mouse visual dynamic states */
+        .mouse-part.active {
+            fill: var(--color-active) !important;
+            stroke: var(--color-active) !important;
+            filter: drop-shadow(0 0 4px var(--color-active-glow));
+        }
+
+        .mouse-part.tested {
+            fill: rgba(0, 245, 155, 0.15);
+            stroke: var(--color-tested);
+        }
+
+        /* Mouse Tracking Zone */
+        .mouse-track-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            height: 160px;
+            background: rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: crosshair;
+            transition: var(--transition-normal);
+            user-select: none;
+        }
+
+        .mouse-track-zone:hover {
+            border-color: var(--color-active);
+            background: rgba(0, 242, 254, 0.02);
+        }
+
+        .mouse-trail-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .track-pointer {
+            width: 8px;
+            height: 8px;
+            background: var(--color-active);
+            border-radius: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            box-shadow: 0 0 10px var(--color-active-glow);
+            display: none;
+            z-index: 2;
+        }
+
+        .track-instruction {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            pointer-events: none;
+            text-align: center;
+            padding: 0 16px;
+            z-index: 2;
+        }
+
+        .mouse-coords, .mouse-speed {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Mouse Status Panel */
+        .mouse-status-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+        }
+
+        .status-indicator-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        @media (max-width: 480px) {
+            .status-indicator-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .status-indicator {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-align: center;
+            color: var(--text-secondary);
+            transition: var(--transition-normal);
+        }
+
+        .status-indicator.active {
+            background: var(--color-active-glow);
+            border-color: var(--color-active);
+            color: var(--text-primary);
+        }
+
+        .status-indicator.tested {
+            background: rgba(0, 245, 155, 0.08);
+            border-color: rgba(0, 245, 155, 0.35);
+            color: var(--color-tested);
+        }
+
+        .scroll-test-wrapper {
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 14px;
+        }
+
+        .scroll-status {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+        }
+
+        .scroll-label {
+            color: var(--text-secondary);
+        }
+
+        .scroll-val {
+            font-weight: 600;
+            color: var(--color-active);
+        }
+
+        .scroll-bar-container {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        .scroll-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-active), var(--color-special));
+            transition: width 0.1s ease;
+        }
+
+        .scroll-count {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-bg"></div>
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="6" y1="8" x2="6" y2="8"></line><line x1="10" y1="8" x2="10" y2="8"></line><line x1="14" y1="8" x2="14" y2="8"></line><line x1="18" y1="8" x2="18" y2="8"></line><line x1="6" y1="12" x2="6" y2="12"></line><line x1="10" y1="12" x2="14" y2="12"></line><line x1="18" y1="12" x2="18" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
+                </div>
+                <h1>KeyTester <span>Pro</span></h1>
+            </div>
+            
+            <div class="controls">
+                <!-- Layout Selector -->
+                <div class="control-group">
+                    <label for="layout-select">Distribución</label>
+                    <select id="layout-select">
+                        <option value="es-iso-100" selected>Español (ISO) 100%</option>
+                        <option value="es-iso-60">Español (ISO) 60%</option>
+                        <option value="en-ansi-100">Inglés US (ANSI) 100%</option>
+                        <option value="en-ansi-60">Inglés US (ANSI) 60%</option>
+                    </select>
+                </div>
+                
+                <!-- Sound Selector -->
+                <div class="control-group">
+                    <label for="switch-sound">Sonido Switch</label>
+                    <select id="switch-sound">
+                        <option value="blue">Cherry MX Blue (Clicky)</option>
+                        <option value="red" selected>Cherry MX Red (Linear)</option>
+                        <option value="brown">Cherry MX Brown (Tactile)</option>
+                        <option value="none">Silencioso</option>
+                    </select>
+                </div>
+
+                <!-- Reset Button -->
+                <button id="btn-reset" class="btn btn-danger">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                    Reiniciar
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <!-- Virtual Keyboard Area -->
+            <section class="keyboard-section">
+                <div class="keyboard-wrapper">
+                    <div id="virtual-keyboard" class="keyboard"></div>
+                </div>
+            </section>
+
+            <!-- Dashboard / Diagnostics Panels -->
+            <section class="dashboard">
+                <!-- Diagnostic Card 1: Key Rollover & Stats -->
+                <div class="card stat-card">
+                    <h2>Diagnóstico en Vivo</h2>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <span class="stat-value" id="stat-pressed-count">0</span>
+                            <span class="stat-label">Teclas Activas</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value" id="stat-tested-pct">0%</span>
+                            <span class="stat-label">Teclas Probadas</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value" id="stat-rollover-max">0</span>
+                            <span class="stat-label">Max Rollover (KRO)</span>
+                        </div>
+                    </div>
+
+                    <div class="active-keys-container">
+                        <h3>Pulsadas simultáneamente:</h3>
+                        <div id="active-keys-list" class="active-keys-list">
+                            <span class="empty-list">Ninguna tecla pulsada</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Diagnostic Card 2: Mouse Tester -->
+                <div class="card mouse-card">
+                    <div class="card-header" style="margin-bottom: 8px;">
+                        <h2>Comprobador de Ratón</h2>
+                        <button id="btn-clear-mouse" class="btn btn-secondary btn-sm">Limpiar</button>
+                    </div>
+                    
+                    <!-- Mouse test grid -->
+                    <div class="mouse-test-container">
+                        <!-- Interactive mouse SVG -->
+                        <div class="mouse-visual-wrapper">
+                            <svg id="mouse-visual" viewBox="0 0 100 160" class="mouse-svg">
+                                <!-- Mouse body background -->
+                                <path class="mouse-part mouse-body-bg" d="M10,60 C10,20 90,20 90,60 L90,110 C90,140 10,140 10,110 Z" />
+                                
+                                <!-- Left button (Mouse0) -->
+                                <path id="mouse-btn-left" class="mouse-part mouse-button" d="M10,60 C10,20 50,20 50,60 L50,80 L10,80 Z" />
+                                
+                                <!-- Right button (Mouse2) -->
+                                <path id="mouse-btn-right" class="mouse-part mouse-button" d="M50,60 C50,20 90,20 90,60 L90,80 L50,80 Z" />
+                                
+                                <!-- Scroll wheel / middle button (Mouse1) -->
+                                <rect id="mouse-btn-middle" class="mouse-part mouse-wheel" x="46" y="35" width="8" height="25" rx="4" />
+                                
+                                <!-- Side button Back (Mouse3) -->
+                                <path id="mouse-btn-back" class="mouse-part mouse-side-button" d="M5,85 L10,85 L10,100 L5,100 Z" />
+                                
+                                <!-- Side button Forward (Mouse4) -->
+                                <path id="mouse-btn-forward" class="mouse-part mouse-side-button" d="M5,65 L10,65 L10,80 L5,80 Z" />
+                            </svg>
+                        </div>
+                        
+                        <!-- Trackpad / Movement Test Area -->
+                        <div id="mouse-track-zone" class="mouse-track-zone">
+                            <canvas id="mouse-trail-canvas" class="mouse-trail-canvas"></canvas>
+                            <div class="track-pointer" id="track-pointer"></div>
+                            <span class="track-instruction">Mueve el cursor aquí para probar el desplazamiento y velocidad</span>
+                            <div id="mouse-coords" class="mouse-coords">X: - | Y: -</div>
+                            <div id="mouse-speed" class="mouse-speed">Velocidad: 0 px/s</div>
+                        </div>
+                    </div>
+
+                    <!-- Scroll test zone and status list -->
+                    <div class="mouse-status-panel">
+                        <div class="status-indicator-grid">
+                            <div id="status-click-left" class="status-indicator">Click Izquierdo</div>
+                            <div id="status-click-middle" class="status-indicator">Click Central</div>
+                            <div id="status-click-right" class="status-indicator">Click Derecho</div>
+                            <div id="status-click-back" class="status-indicator">Atrás (Botón 4)</div>
+                            <div id="status-click-forward" class="status-indicator">Adelante (Botón 5)</div>
+                        </div>
+                        
+                        <div class="scroll-test-wrapper">
+                            <div class="scroll-status">
+                                <span class="scroll-label">Giro de ruleta:</span>
+                                <span id="scroll-direction" class="scroll-val">-</span>
+                            </div>
+                            <div class="scroll-bar-container">
+                                <div id="scroll-bar-fill" class="scroll-bar-fill" style="width: 50%;"></div>
+                            </div>
+                            <div class="scroll-count">Paso de ruleta acumulado: <span id="scroll-total">0</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Diagnostic Card 3: Keyboard & System Metadata -->
+                <div class="card metadata-card">
+                    <h2>Metadatos e Información</h2>
+                    <div class="meta-grid">
+                        <div class="meta-box">
+                            <span class="meta-title">Layout Físico</span>
+                            <span class="meta-val" id="meta-layout-type">
+                                <span class="badge badge-inactive"><span class="badge-dot"></span>Detectando...</span>
+                            </span>
+                        </div>
+                        <div class="meta-box">
+                            <span class="meta-title">Idioma Detectado</span>
+                            <span class="meta-val" id="meta-sys-lang">-</span>
+                        </div>
+                        <div class="meta-box">
+                            <span class="meta-title">Sistema Operativo</span>
+                            <span class="meta-val" id="meta-sys-os">-</span>
+                        </div>
+                        <div class="meta-box">
+                            <span class="meta-title">Navegador</span>
+                            <span class="meta-val" id="meta-sys-browser">-</span>
+                        </div>
+                        <div class="meta-box">
+                            <span class="meta-title">API Keyboard Map</span>
+                            <span class="meta-val" id="meta-api-status">
+                                <span class="badge badge-unsupported"><span class="badge-dot"></span>No Soportado</span>
+                            </span>
+                        </div>
+                        <div class="meta-box">
+                            <span class="meta-title">Bloq Mayús</span>
+                            <span class="meta-val" id="meta-caps-lock">
+                                <span class="badge badge-inactive"><span class="badge-dot"></span>Inactivo</span>
+                            </span>
+                        </div>
+                        <div class="meta-box">
+                            <span class="meta-title">Bloq Num</span>
+                            <span class="meta-val" id="meta-num-lock">
+                                <span class="badge badge-inactive"><span class="badge-dot"></span>Inactivo</span>
+                            </span>
+                        </div>
+                        <div class="meta-box">
+                            <span class="meta-title">Contexto HTTPS</span>
+                            <span class="meta-val" id="meta-secure-context">
+                                <span class="badge badge-inactive"><span class="badge-dot"></span>No</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Diagnostic Card 4: Live Log -->
+                <div class="card log-card">
+                    <div class="card-header">
+                        <h2>Historial de Eventos</h2>
+                        <button id="btn-clear-log" class="btn btn-secondary btn-sm">Limpiar</button>
+                    </div>
+                    <div class="log-table-wrapper">
+                        <table class="log-table">
+                            <thead>
+                                <tr>
+                                    <th>Acción</th>
+                                    <th>Tecla (UI)</th>
+                                    <th>Event.key</th>
+                                    <th>Event.code</th>
+                                    <th>KeyCode</th>
+                                    <th>Tiempo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="log-body">
+                                <tr>
+                                    <td colspan="6" class="empty-log">Esperando pulsaciones de teclas...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Interactive sound overlay note for user -->
+        <div id="audio-init-banner" class="audio-banner">
+            <span>🔊 Haz clic en cualquier parte de la pantalla para activar el audio del probador.</span>
+            <button id="btn-close-audio-banner">Entendido</button>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>KeyTester Pro &bull; Presiona cualquier tecla para comenzar. Diseñado con ❤️ para comprobar el hardware de tu teclado.</p>
+        </footer>
+    </div>
+
+    <!-- Script (Embedded) -->
+    <script>
+        /* -------------------------------------------------------------
+         * KeyTester Pro - Core JavaScript (Embedded)
+         * ------------------------------------------------------------- */
+
+        const KEYBOARD_LAYOUTS = {
+            "es-iso-100": {
+                alpha: [
+                    [
+                        { code: "Escape", label: "Esc", type: "modifier" },
+                        { type: "spacer", w: 0.5 },
+                        { code: "F1", label: "F1", type: "modifier" },
+                        { code: "F2", label: "F2", type: "modifier" },
+                        { code: "F3", label: "F3", type: "modifier" },
+                        { code: "F4", label: "F4", type: "modifier" },
+                        { type: "spacer", w: 0.5 },
+                        { code: "F5", label: "F5", type: "modifier" },
+                        { code: "F6", label: "F6", type: "modifier" },
+                        { code: "F7", label: "F7", type: "modifier" },
+                        { code: "F8", label: "F8", type: "modifier" },
+                        { type: "spacer", w: 0.5 },
+                        { code: "F9", label: "F9", type: "modifier" },
+                        { code: "F10", label: "F10", type: "modifier" },
+                        { code: "F11", label: "F11", type: "modifier" },
+                        { code: "F12", label: "F12", type: "modifier" },
+                        { type: "spacer", w: 0.5 }
+                    ],
+                    [
+                        { code: "Backquote", label: "º", shiftLabel: "ª" },
+                        { code: "Digit1", label: "1", shiftLabel: "!" },
+                        { code: "Digit2", label: "2", shiftLabel: '"' },
+                        { code: "Digit3", label: "3", shiftLabel: "·" },
+                        { code: "Digit4", label: "4", shiftLabel: "$" },
+                        { code: "Digit5", label: "5", shiftLabel: "%" },
+                        { code: "Digit6", label: "6", shiftLabel: "&" },
+                        { code: "Digit7", label: "7", shiftLabel: "/" },
+                        { code: "Digit8", label: "8", shiftLabel: "(" },
+                        { code: "Digit9", label: "9", shiftLabel: ")" },
+                        { code: "Digit0", label: "0", shiftLabel: "=" },
+                        { code: "Minus", label: "'", shiftLabel: "?" },
+                        { code: "Equal", label: "¡", shiftLabel: "¿" },
+                        { code: "Backspace", label: "Retroceso", w: 2, type: "modifier" }
+                    ],
+                    [
+                        { code: "Tab", label: "Tab", w: 1.5, type: "modifier" },
+                        { code: "KeyQ", label: "Q" },
+                        { code: "KeyW", label: "W" },
+                        { code: "KeyE", label: "E" },
+                        { code: "KeyR", label: "R" },
+                        { code: "KeyT", label: "T" },
+                        { code: "KeyY", label: "Y" },
+                        { code: "KeyU", label: "U" },
+                        { code: "KeyI", label: "I" },
+                        { code: "KeyO", label: "O" },
+                        { code: "KeyP", label: "P" },
+                        { code: "BracketLeft", label: "`", shiftLabel: "^" },
+                        { code: "BracketRight", label: "+", shiftLabel: "*" },
+                        { code: "Enter", label: "Intro", w: 1.5, type: "modifier", class: "key-enter-iso-top" }
+                    ],
+                    [
+                        { code: "CapsLock", label: "Bloq Mayús", w: 1.75, type: "modifier" },
+                        { code: "KeyA", label: "A" },
+                        { code: "KeyS", label: "S" },
+                        { code: "KeyD", label: "D" },
+                        { code: "KeyF", label: "F" },
+                        { code: "KeyG", label: "G" },
+                        { code: "KeyH", label: "H" },
+                        { code: "KeyJ", label: "J" },
+                        { code: "KeyK", label: "K" },
+                        { code: "KeyL", label: "L" },
+                        { code: "Semicolon", label: "Ñ" },
+                        { code: "Quote", label: "´", shiftLabel: "¨" },
+                        { code: "Backslash", label: "Ç" },
+                        { code: "Enter", label: "Intro", w: 1.25, type: "modifier", class: "key-enter-iso-bottom" }
+                    ],
+                    [
+                        { code: "ShiftLeft", label: "Mayús", w: 1.25, type: "modifier" },
+                        { code: "IntlBackslash", label: "<", shiftLabel: ">" },
+                        { code: "KeyZ", label: "Z" },
+                        { code: "KeyX", label: "X" },
+                        { code: "KeyC", label: "C" },
+                        { code: "KeyV", label: "V" },
+                        { code: "KeyB", label: "B" },
+                        { code: "KeyN", label: "N" },
+                        { code: "KeyM", label: "M" },
+                        { code: "Comma", label: ",", shiftLabel: ";" },
+                        { code: "Period", label: ".", shiftLabel: ":" },
+                        { code: "Slash", label: "-", shiftLabel: "_" },
+                        { code: "ShiftRight", label: "Mayús", w: 2.75, type: "modifier" }
+                    ],
+                    [
+                        { code: "ControlLeft", label: "Ctrl", w: 1.25, type: "modifier" },
+                        { code: "Fn", label: "Fn", w: 1, type: "modifier" },
+                        { code: "MetaLeft", label: "Win", w: 1, type: "modifier" },
+                        { code: "AltLeft", label: "Alt", w: 1.25, type: "modifier" },
+                        { code: "Space", label: "Espacio", w: 6 },
+                        { code: "AltRight", label: "AltGr", w: 1.25, type: "modifier" },
+                        { code: "ContextMenu", label: "Menú", w: 1.25, type: "modifier" },
+                        { code: "ControlRight", label: "Ctrl", w: 2, type: "modifier" }
+                    ]
+                ],
+                nav: [
+                    [
+                        { code: "PrintScreen", label: "Impr Pant", type: "modifier" },
+                        { code: "ScrollLock", label: "Bloq Despl", type: "modifier" },
+                        { code: "Pause", label: "Pausa", type: "modifier" }
+                    ],
+                    [
+                        { code: "Insert", label: "Ins", type: "modifier" },
+                        { code: "Home", label: "Inicio", type: "modifier" },
+                        { code: "PageUp", label: "Re Pág", type: "modifier" }
+                    ],
+                    [
+                        { code: "Delete", label: "Supr", type: "modifier" },
+                        { code: "End", label: "Fin", type: "modifier" },
+                        { code: "PageDown", label: "Av Pág", type: "modifier" }
+                    ],
+                    [
+                        { type: "spacer", w: 3 }
+                    ],
+                    [
+                        { type: "spacer", w: 1 },
+                        { code: "ArrowUp", label: "▲", type: "modifier" },
+                        { type: "spacer", w: 1 }
+                    ],
+                    [
+                        { code: "ArrowLeft", label: "◄", type: "modifier" },
+                        { code: "ArrowDown", label: "▼", type: "modifier" },
+                        { code: "ArrowRight", label: "►", type: "modifier" }
+                    ]
+                ],
+                numpad: [
+                    [
+                        { code: "NumLock", label: "Bloq Num", type: "modifier" },
+                        { code: "NumpadDivide", label: "/", type: "modifier" },
+                        { code: "NumpadMultiply", label: "*", type: "modifier" },
+                        { code: "NumpadSubtract", label: "-", type: "modifier" }
+                    ],
+                    [
+                        { code: "Numpad7", label: "7" },
+                        { code: "Numpad8", label: "8" },
+                        { code: "Numpad9", label: "9" },
+                        { code: "NumpadAdd", label: "+", gridRow: "span 2", type: "modifier" }
+                    ],
+                    [
+                        { code: "Numpad4", label: "4" },
+                        { code: "Numpad5", label: "5" },
+                        { code: "Numpad6", label: "6" }
+                    ],
+                    [
+                        { code: "Numpad1", label: "1" },
+                        { code: "Numpad2", label: "2" },
+                        { code: "Numpad3", label: "3" },
+                        { code: "NumpadEnter", label: "Intro", gridRow: "span 2", type: "modifier" }
+                    ],
+                    [
+                        { code: "Numpad0", label: "0", gridColumn: "span 2" },
+                        { code: "NumpadDecimal", label: "," }
+                    ]
+                ]
+            },
+            "es-iso-60": {
+                alpha: [
+                    [
+                        { code: "Escape", label: "Esc", type: "modifier" },
+                        { code: "Digit1", label: "1", shiftLabel: "!" },
+                        { code: "Digit2", label: "2", shiftLabel: '"' },
+                        { code: "Digit3", label: "3", shiftLabel: "·" },
+                        { code: "Digit4", label: "4", shiftLabel: "$" },
+                        { code: "Digit5", label: "5", shiftLabel: "%" },
+                        { code: "Digit6", label: "6", shiftLabel: "&" },
+                        { code: "Digit7", label: "7", shiftLabel: "/" },
+                        { code: "Digit8", label: "8", shiftLabel: "(" },
+                        { code: "Digit9", label: "9", shiftLabel: ")" },
+                        { code: "Digit0", label: "0", shiftLabel: "=" },
+                        { code: "Minus", label: "'", shiftLabel: "?" },
+                        { code: "Equal", label: "¡", shiftLabel: "¿" },
+                        { code: "Backspace", label: "Retroceso", w: 2, type: "modifier" }
+                    ],
+                    [
+                        { code: "Tab", label: "Tab", w: 1.5, type: "modifier" },
+                        { code: "KeyQ", label: "Q" },
+                        { code: "KeyW", label: "W" },
+                        { code: "KeyE", label: "E" },
+                        { code: "KeyR", label: "R" },
+                        { code: "KeyT", label: "T" },
+                        { code: "KeyY", label: "Y" },
+                        { code: "KeyU", label: "U" },
+                        { code: "KeyI", label: "I" },
+                        { code: "KeyO", label: "O" },
+                        { code: "KeyP", label: "P" },
+                        { code: "BracketLeft", label: "`", shiftLabel: "^" },
+                        { code: "BracketRight", label: "+", shiftLabel: "*" },
+                        { code: "Enter", label: "Intro", w: 1.5, type: "modifier", class: "key-enter-iso-top" }
+                    ],
+                    [
+                        { code: "CapsLock", label: "Bloq Mayús", w: 1.75, type: "modifier" },
+                        { code: "KeyA", label: "A" },
+                        { code: "KeyS", label: "S" },
+                        { code: "KeyD", label: "D" },
+                        { code: "KeyF", label: "F" },
+                        { code: "KeyG", label: "G" },
+                        { code: "KeyH", label: "H" },
+                        { code: "KeyJ", label: "J" },
+                        { code: "KeyK", label: "K" },
+                        { code: "KeyL", label: "L" },
+                        { code: "Semicolon", label: "Ñ" },
+                        { code: "Quote", label: "´", shiftLabel: "¨" },
+                        { code: "Backslash", label: "Ç" },
+                        { code: "Enter", label: "Intro", w: 1.25, type: "modifier", class: "key-enter-iso-bottom" }
+                    ],
+                    [
+                        { code: "ShiftLeft", label: "Mayús", w: 1.25, type: "modifier" },
+                        { code: "IntlBackslash", label: "<", shiftLabel: ">" },
+                        { code: "KeyZ", label: "Z" },
+                        { code: "KeyX", label: "X" },
+                        { code: "KeyC", label: "C" },
+                        { code: "KeyV", label: "V" },
+                        { code: "KeyB", label: "B" },
+                        { code: "KeyN", label: "N" },
+                        { code: "KeyM", label: "M" },
+                        { code: "Comma", label: ",", shiftLabel: ";" },
+                        { code: "Period", label: ".", shiftLabel: ":" },
+                        { code: "Slash", label: "-", shiftLabel: "_" },
+                        { code: "ShiftRight", label: "Mayús", w: 2.75, type: "modifier" }
+                    ],
+                    [
+                        { code: "ControlLeft", label: "Ctrl", w: 1.25, type: "modifier" },
+                        { code: "Fn", label: "Fn", w: 1, type: "modifier" },
+                        { code: "MetaLeft", label: "Win", w: 1, type: "modifier" },
+                        { code: "AltLeft", label: "Alt", w: 1.25, type: "modifier" },
+                        { code: "Space", label: "Espacio", w: 6 },
+                        { code: "AltRight", label: "AltGr", w: 1.25, type: "modifier" },
+                        { code: "ContextMenu", label: "Menú", w: 1.25, type: "modifier" },
+                        { code: "ControlRight", label: "Ctrl", w: 2, type: "modifier" }
+                    ]
+                ]
+            },
+            "en-ansi-100": {
+                alpha: [
+                    [
+                        { code: "Escape", label: "Esc", type: "modifier" },
+                        { type: "spacer", w: 0.5 },
+                        { code: "F1", label: "F1", type: "modifier" },
+                        { code: "F2", label: "F2", type: "modifier" },
+                        { code: "F3", label: "F3", type: "modifier" },
+                        { code: "F4", label: "F4", type: "modifier" },
+                        { type: "spacer", w: 0.5 },
+                        { code: "F5", label: "F5", type: "modifier" },
+                        { code: "F6", label: "F6", type: "modifier" },
+                        { code: "F7", label: "F7", type: "modifier" },
+                        { code: "F8", label: "F8", type: "modifier" },
+                        { type: "spacer", w: 0.5 },
+                        { code: "F9", label: "F9", type: "modifier" },
+                        { code: "F10", label: "F10", type: "modifier" },
+                        { code: "F11", label: "F11", type: "modifier" },
+                        { code: "F12", label: "F12", type: "modifier" },
+                        { type: "spacer", w: 0.5 }
+                    ],
+                    [
+                        { code: "Backquote", label: "`", shiftLabel: "~" },
+                        { code: "Digit1", label: "1", shiftLabel: "!" },
+                        { code: "Digit2", label: "2", shiftLabel: "@" },
+                        { code: "Digit3", label: "3", shiftLabel: "#" },
+                        { code: "Digit4", label: "4", shiftLabel: "$" },
+                        { code: "Digit5", label: "5", shiftLabel: "%" },
+                        { code: "Digit6", label: "6", shiftLabel: "^" },
+                        { code: "Digit7", label: "7", shiftLabel: "&" },
+                        { code: "Digit8", label: "8", shiftLabel: "*" },
+                        { code: "Digit9", label: "9", shiftLabel: "(" },
+                        { code: "Digit0", label: "0", shiftLabel: ")" },
+                        { code: "Minus", label: "-", shiftLabel: "_" },
+                        { code: "Equal", label: "=", shiftLabel: "+" },
+                        { code: "Backspace", label: "Retroceso", w: 2, type: "modifier" }
+                    ],
+                    [
+                        { code: "Tab", label: "Tab", w: 1.5, type: "modifier" },
+                        { code: "KeyQ", label: "Q" },
+                        { code: "KeyW", label: "W" },
+                        { code: "KeyE", label: "E" },
+                        { code: "KeyR", label: "R" },
+                        { code: "KeyT", label: "T" },
+                        { code: "KeyY", label: "Y" },
+                        { code: "KeyU", label: "U" },
+                        { code: "KeyI", label: "I" },
+                        { code: "KeyO", label: "O" },
+                        { code: "KeyP", label: "P" },
+                        { code: "BracketLeft", label: "[", shiftLabel: "{" },
+                        { code: "BracketRight", label: "]", shiftLabel: "}" },
+                        { code: "Backslash", label: "\\", shiftLabel: "|", w: 1.5 }
+                    ],
+                    [
+                        { code: "CapsLock", label: "Bloq Mayús", w: 1.75, type: "modifier" },
+                        { code: "KeyA", label: "A" },
+                        { code: "KeyS", label: "S" },
+                        { code: "KeyD", label: "D" },
+                        { code: "KeyF", label: "F" },
+                        { code: "KeyG", label: "G" },
+                        { code: "KeyH", label: "H" },
+                        { code: "KeyJ", label: "J" },
+                        { code: "KeyK", label: "K" },
+                        { code: "KeyL", label: "L" },
+                        { code: "Semicolon", label: ";", shiftLabel: ":" },
+                        { code: "Quote", label: "'", shiftLabel: '"' },
+                        { code: "Enter", label: "Intro", w: 2.25, type: "modifier" }
+                    ],
+                    [
+                        { code: "ShiftLeft", label: "Mayús", w: 2.25, type: "modifier" },
+                        { code: "KeyZ", label: "Z" },
+                        { code: "KeyX", label: "X" },
+                        { code: "KeyC", label: "C" },
+                        { code: "KeyV", label: "V" },
+                        { code: "KeyB", label: "B" },
+                        { code: "KeyN", label: "N" },
+                        { code: "KeyM", label: "M" },
+                        { code: "Comma", label: ",", shiftLabel: "<" },
+                        { code: "Period", label: ".", shiftLabel: ">" },
+                        { code: "Slash", label: "/", shiftLabel: "?" },
+                        { code: "ShiftRight", label: "Mayús", w: 2.75, type: "modifier" }
+                    ],
+                    [
+                        { code: "ControlLeft", label: "Ctrl", w: 1.25, type: "modifier" },
+                        { code: "Fn", label: "Fn", w: 1, type: "modifier" },
+                        { code: "MetaLeft", label: "Win", w: 1, type: "modifier" },
+                        { code: "AltLeft", label: "Alt", w: 1.25, type: "modifier" },
+                        { code: "Space", label: "Espacio", w: 6 },
+                        { code: "AltRight", label: "AltGr", w: 1.25, type: "modifier" },
+                        { code: "ContextMenu", label: "Menú", w: 1.25, type: "modifier" },
+                        { code: "ControlRight", label: "Ctrl", w: 2, type: "modifier" }
+                    ]
+                ],
+                nav: [
+                    [
+                        { code: "PrintScreen", label: "Impr Pant", type: "modifier" },
+                        { code: "ScrollLock", label: "Bloq Despl", type: "modifier" },
+                        { code: "Pause", label: "Pausa", type: "modifier" }
+                    ],
+                    [
+                        { code: "Insert", label: "Ins", type: "modifier" },
+                        { code: "Home", label: "Inicio", type: "modifier" },
+                        { code: "PageUp", label: "Re Pág", type: "modifier" }
+                    ],
+                    [
+                        { code: "Delete", label: "Supr", type: "modifier" },
+                        { code: "End", label: "Fin", type: "modifier" },
+                        { code: "PageDown", label: "Av Pág", type: "modifier" }
+                    ],
+                    [
+                        { type: "spacer", w: 3 }
+                    ],
+                    [
+                        { type: "spacer", w: 1 },
+                        { code: "ArrowUp", label: "▲", type: "modifier" },
+                        { type: "spacer", w: 1 }
+                    ],
+                    [
+                        { code: "ArrowLeft", label: "◄", type: "modifier" },
+                        { code: "ArrowDown", label: "▼", type: "modifier" },
+                        { code: "ArrowRight", label: "►", type: "modifier" }
+                    ]
+                ],
+                numpad: [
+                    [
+                        { code: "NumLock", label: "Bloq Num", type: "modifier" },
+                        { code: "NumpadDivide", label: "/", type: "modifier" },
+                        { code: "NumpadMultiply", label: "*", type: "modifier" },
+                        { code: "NumpadSubtract", label: "-", type: "modifier" }
+                    ],
+                    [
+                        { code: "Numpad7", label: "7" },
+                        { code: "Numpad8", label: "8" },
+                        { code: "Numpad9", label: "9" },
+                        { code: "NumpadAdd", label: "+", gridRow: "span 2", type: "modifier" }
+                    ],
+                    [
+                        { code: "Numpad4", label: "4" },
+                        { code: "Numpad5", label: "5" },
+                        { code: "Numpad6", label: "6" }
+                    ],
+                    [
+                        { code: "Numpad1", label: "1" },
+                        { code: "Numpad2", label: "2" },
+                        { code: "Numpad3", label: "3" },
+                        { code: "NumpadEnter", label: "Intro", gridRow: "span 2", type: "modifier" }
+                    ],
+                    [
+                        { code: "Numpad0", label: "0", gridColumn: "span 2" },
+                        { code: "NumpadDecimal", label: "," }
+                    ]
+                ]
+            },
+            "en-ansi-60": {
+                alpha: [
+                    [
+                        { code: "Escape", label: "Esc", type: "modifier" },
+                        { code: "Digit1", label: "1", shiftLabel: "!" },
+                        { code: "Digit2", label: "2", shiftLabel: "@" },
+                        { code: "Digit3", label: "3", shiftLabel: "#" },
+                        { code: "Digit4", label: "4", shiftLabel: "$" },
+                        { code: "Digit5", label: "5", shiftLabel: "%" },
+                        { code: "Digit6", label: "6", shiftLabel: "^" },
+                        { code: "Digit7", label: "7", shiftLabel: "&" },
+                        { code: "Digit8", label: "8", shiftLabel: "*" },
+                        { code: "Digit9", label: "9", shiftLabel: "(" },
+                        { code: "Digit0", label: "0", shiftLabel: ")" },
+                        { code: "Minus", label: "-", shiftLabel: "_" },
+                        { code: "Equal", label: "=", shiftLabel: "+" },
+                        { code: "Backspace", label: "Retroceso", w: 2, type: "modifier" }
+                    ],
+                    [
+                        { code: "Tab", label: "Tab", w: 1.5, type: "modifier" },
+                        { code: "KeyQ", label: "Q" },
+                        { code: "KeyW", label: "W" },
+                        { code: "KeyE", label: "E" },
+                        { code: "KeyR", label: "R" },
+                        { code: "KeyT", label: "T" },
+                        { code: "KeyY", label: "Y" },
+                        { code: "KeyU", label: "U" },
+                        { code: "KeyI", label: "I" },
+                        { code: "KeyO", label: "O" },
+                        { code: "KeyP", label: "P" },
+                        { code: "BracketLeft", label: "[", shiftLabel: "{" },
+                        { code: "BracketRight", label: "]", shiftLabel: "}" },
+                        { code: "Backslash", label: "\\", shiftLabel: "|", w: 1.5 }
+                    ],
+                    [
+                        { code: "CapsLock", label: "Bloq Mayús", w: 1.75, type: "modifier" },
+                        { code: "KeyA", label: "A" },
+                        { code: "KeyS", label: "S" },
+                        { code: "KeyD", label: "D" },
+                        { code: "KeyF", label: "F" },
+                        { code: "KeyG", label: "G" },
+                        { code: "KeyH", label: "H" },
+                        { code: "KeyJ", label: "J" },
+                        { code: "KeyK", label: "K" },
+                        { code: "KeyL", label: "L" },
+                        { code: "Semicolon", label: ";", shiftLabel: ":" },
+                        { code: "Quote", label: "'", shiftLabel: '"' },
+                        { code: "Enter", label: "Intro", w: 2.25, type: "modifier" }
+                    ],
+                    [
+                        { code: "ShiftLeft", label: "Mayús", w: 2.25, type: "modifier" },
+                        { code: "KeyZ", label: "Z" },
+                        { code: "KeyX", label: "X" },
+                        { code: "KeyC", label: "C" },
+                        { code: "KeyV", label: "V" },
+                        { code: "KeyB", label: "B" },
+                        { code: "KeyN", label: "N" },
+                        { code: "KeyM", label: "M" },
+                        { code: "Comma", label: ",", shiftLabel: "<" },
+                        { code: "Period", label: ".", shiftLabel: ">" },
+                        { code: "Slash", label: "/", shiftLabel: "?" },
+                        { code: "ShiftRight", label: "Mayús", w: 2.75, type: "modifier" }
+                    ],
+                    [
+                        { code: "ControlLeft", label: "Ctrl", w: 1.25, type: "modifier" },
+                        { code: "Fn", label: "Fn", w: 1, type: "modifier" },
+                        { code: "MetaLeft", label: "Win", w: 1, type: "modifier" },
+                        { code: "AltLeft", label: "Alt", w: 1.25, type: "modifier" },
+                        { code: "Space", label: "Espacio", w: 6 },
+                        { code: "AltRight", label: "AltGr", w: 1.25, type: "modifier" },
+                        { code: "ContextMenu", label: "Menú", w: 1.25, type: "modifier" },
+                        { code: "ControlRight", label: "Ctrl", w: 2, type: "modifier" }
+                    ]
+                ]
+            }
+        };
+
+        let audioCtx = null;
+        let switchSoundType = "red";
+
+        let activeKeys = new Set();
+        let testedKeys = new Set();
+        let maxRollover = 0;
+        let totalLayoutKeysCount = 0;
+
+        const keyboardContainer = document.getElementById("virtual-keyboard");
+        const layoutSelect = document.getElementById("layout-select");
+        const soundSelect = document.getElementById("switch-sound");
+        const btnReset = document.getElementById("btn-reset");
+        const btnClearLog = document.getElementById("btn-clear-log");
+        const logBody = document.getElementById("log-body");
+        const audioBanner = document.getElementById("audio-init-banner");
+        const btnCloseAudioBanner = document.getElementById("btn-close-audio-banner");
+
+        const statPressedCount = document.getElementById("stat-pressed-count");
+        const statTestedPct = document.getElementById("stat-tested-pct");
+        const statRolloverMax = document.getElementById("stat-rollover-max");
+        const activeKeysList = document.getElementById("active-keys-list");
+
+        // Metadata DOM Elements
+        const metaLayoutType = document.getElementById("meta-layout-type");
+        const metaSysLang = document.getElementById("meta-sys-lang");
+        const metaSysOs = document.getElementById("meta-sys-os");
+        const metaSysBrowser = document.getElementById("meta-sys-browser");
+        const metaApiStatus = document.getElementById("meta-api-status");
+        const metaCapsLock = document.getElementById("meta-caps-lock");
+        const metaNumLock = document.getElementById("meta-num-lock");
+        const metaSecureContext = document.getElementById("meta-secure-context");
+
+        // Mouse Tester DOM Elements
+        const mouseTrackZone = document.getElementById("mouse-track-zone");
+        const trackPointer = document.getElementById("track-pointer");
+        const mouseCoords = document.getElementById("mouse-coords");
+        const mouseSpeed = document.getElementById("mouse-speed");
+        const mouseBtnLeft = document.getElementById("mouse-btn-left");
+        const mouseBtnRight = document.getElementById("mouse-btn-right");
+        const mouseBtnMiddle = document.getElementById("mouse-btn-middle");
+        const mouseBtnBack = document.getElementById("mouse-btn-back");
+        const mouseBtnForward = document.getElementById("mouse-btn-forward");
+        const statusClickLeft = document.getElementById("status-click-left");
+        const statusClickRight = document.getElementById("status-click-right");
+        const statusClickMiddle = document.getElementById("status-click-middle");
+        const statusClickBack = document.getElementById("status-click-back");
+        const statusClickForward = document.getElementById("status-click-forward");
+        const scrollDirection = document.getElementById("scroll-direction");
+        const scrollBarFill = document.getElementById("scroll-bar-fill");
+        const scrollTotal = document.getElementById("scroll-total");
+        const btnClearMouse = document.getElementById("btn-clear-mouse");
+        const mouseTrailCanvas = document.getElementById("mouse-trail-canvas");
+
+        // Mouse Tester State Variables
+        let trailPoints = [];
+        let lastMoveTime = 0;
+        let lastPosX = 0;
+        let lastPosY = 0;
+        let currentSpeed = 0;
+        let totalScrollSteps = 0;
+        let lastScrollTime = 0;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                audioBanner.style.opacity = "0";
+                setTimeout(() => audioBanner.remove(), 300);
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSwitchSound() {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            const now = audioCtx.currentTime;
+            
+            if (switchSoundType === "red") {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = "triangle";
+                osc.frequency.setValueAtTime(130, now);
+                osc.frequency.exponentialRampToValueAtTime(35, now + 0.06);
+                
+                gainNode.gain.setValueAtTime(0.6, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+                
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = "lowpass";
+                filter.frequency.setValueAtTime(280, now);
+                
+                osc.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start(now);
+                osc.stop(now + 0.07);
+                
+                playNoise(0.02, 180, 0.2, now);
+            } 
+            else if (switchSoundType === "brown") {
+                playNoise(0.012, 1000, 0.15, now, "bandpass");
+                
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = "triangle";
+                osc.frequency.setValueAtTime(155, now + 0.005);
+                osc.frequency.exponentialRampToValueAtTime(45, now + 0.07);
+                
+                gainNode.gain.setValueAtTime(0.5, now + 0.005);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+                
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = "lowpass";
+                filter.frequency.setValueAtTime(450, now);
+                
+                osc.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start(now + 0.005);
+                osc.stop(now + 0.075);
+            } 
+            else if (switchSoundType === "blue") {
+                playNoise(0.008, 4500, 0.45, now, "highpass");
+                
+                const pingOsc = audioCtx.createOscillator();
+                const pingGain = audioCtx.createGain();
+                pingOsc.type = "sine";
+                pingOsc.frequency.setValueAtTime(1900, now);
+                pingOsc.frequency.linearRampToValueAtTime(1100, now + 0.009);
+                pingGain.gain.setValueAtTime(0.18, now);
+                pingGain.gain.exponentialRampToValueAtTime(0.001, now + 0.009);
+                
+                pingOsc.connect(pingGain);
+                pingGain.connect(audioCtx.destination);
+                pingOsc.start(now);
+                pingOsc.stop(now + 0.01);
+                
+                const clackOsc = audioCtx.createOscillator();
+                const clackGain = audioCtx.createGain();
+                clackOsc.type = "triangle";
+                clackOsc.frequency.setValueAtTime(185, now + 0.003);
+                clackOsc.frequency.exponentialRampToValueAtTime(60, now + 0.05);
+                
+                clackGain.gain.setValueAtTime(0.4, now + 0.003);
+                clackGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                
+                const clackFilter = audioCtx.createBiquadFilter();
+                clackFilter.type = "lowpass";
+                clackFilter.frequency.setValueAtTime(700, now);
+                
+                clackOsc.connect(clackFilter);
+                clackFilter.connect(clackGain);
+                clackGain.connect(audioCtx.destination);
+                
+                clackOsc.start(now + 0.003);
+                clackOsc.stop(now + 0.055);
+            }
+        }
+
+        function playNoise(duration, filterFreq, gainVal, time, filterType = "lowpass") {
+            const bufferSize = audioCtx.sampleRate * duration;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            
+            const noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = buffer;
+            
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = filterType;
+            filter.frequency.setValueAtTime(filterFreq, time);
+            
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(gainVal, time);
+            noiseGain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+            
+            noiseSource.connect(filter);
+            filter.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+            
+            noiseSource.start(time);
+            noiseSource.stop(time + duration);
+        }
+
+        function renderKeyboard(layoutId) {
+            keyboardContainer.innerHTML = "";
+            const layout = KEYBOARD_LAYOUTS[layoutId] || KEYBOARD_LAYOUTS["es-iso-100"];
+            totalLayoutKeysCount = 0;
+            
+            if (layout.alpha) {
+                const alphaEl = document.createElement("div");
+                alphaEl.className = "keyboard-block block-alpha";
+                renderBlockRows(layout.alpha, alphaEl);
+                keyboardContainer.appendChild(alphaEl);
+                
+                if (layout.nav) {
+                    const navEl = document.createElement("div");
+                    navEl.className = "keyboard-block block-nav";
+                    renderBlockRows(layout.nav, navEl);
+                    keyboardContainer.appendChild(navEl);
+                }
+                
+                if (layout.numpad) {
+                    const numpadEl = document.createElement("div");
+                    numpadEl.className = "keyboard-block block-numpad";
+                    renderBlockGrid(layout.numpad, numpadEl);
+                    keyboardContainer.appendChild(numpadEl);
+                }
+            } else {
+                const alphaEl = document.createElement("div");
+                alphaEl.className = "keyboard-block block-alpha";
+                renderBlockRows(layout, alphaEl);
+                keyboardContainer.appendChild(alphaEl);
+            }
+            
+            updateStatistics();
+        }
+
+        function renderBlockRows(rows, containerEl) {
+            rows.forEach((row, rowIndex) => {
+                const rowEl = document.createElement("div");
+                rowEl.className = "keyboard-row";
+                
+                if (rowIndex === 0 && rows.length > 5) {
+                    rowEl.classList.add("row-fkeys");
+                }
+                
+                row.forEach(keyData => {
+                    if (keyData.type === "spacer") {
+                        const spacerEl = document.createElement("div");
+                        spacerEl.className = "key spacer";
+                        spacerEl.style.setProperty("--key-w", keyData.w || 1);
+                        rowEl.appendChild(spacerEl);
+                        return;
+                    }
+                    
+                    if (keyData.code !== "Fn") {
+                        totalLayoutKeysCount++;
+                    }
+                    const keyEl = createKeycapElement(keyData);
+                    rowEl.appendChild(keyEl);
+                });
+                
+                containerEl.appendChild(rowEl);
+            });
+        }
+
+        function renderBlockGrid(gridRows, containerEl) {
+            gridRows.forEach(row => {
+                row.forEach(keyData => {
+                    if (keyData.type === "spacer") {
+                        const spacerEl = document.createElement("div");
+                        spacerEl.className = "key spacer";
+                        if (keyData.gridRow) spacerEl.style.gridRow = keyData.gridRow;
+                        if (keyData.gridColumn) spacerEl.style.gridColumn = keyData.gridColumn;
+                        containerEl.appendChild(spacerEl);
+                        return;
+                    }
+                    
+                    if (keyData.code !== "Fn") {
+                        totalLayoutKeysCount++;
+                    }
+                    const keyEl = createKeycapElement(keyData);
+                    if (keyData.gridRow) keyEl.style.gridRow = keyData.gridRow;
+                    if (keyData.gridColumn) keyEl.style.gridColumn = keyData.gridColumn;
+                    containerEl.appendChild(keyEl);
+                });
+            });
+        }
+
+        function createKeycapElement(keyData) {
+            const keyEl = document.createElement("div");
+            keyEl.className = "key";
+            keyEl.setAttribute("data-code", keyData.code);
+            
+            if (keyData.class) {
+                keyEl.classList.add(keyData.class);
+            }
+            
+            if (keyData.type === "modifier") {
+                keyEl.classList.add("modifier");
+            }
+            if (keyData.w) {
+                keyEl.style.setProperty("--key-w", keyData.w);
+            }
+            
+            const labelSpan = document.createElement("span");
+            labelSpan.className = "key-label-primary";
+            labelSpan.textContent = keyData.label;
+            keyEl.appendChild(labelSpan);
+            
+            if (keyData.shiftLabel) {
+                const shiftSpan = document.createElement("span");
+                shiftSpan.className = "key-label-secondary";
+                shiftSpan.textContent = keyData.shiftLabel;
+                keyEl.appendChild(shiftSpan);
+            }
+            
+            if (testedKeys.has(keyData.code)) {
+                keyEl.classList.add("tested");
+            }
+            
+            return keyEl;
+        }
+
+        let lastControlLeftTime = 0;
+        let wasControlLeftSuppressed = false;
+
+        function removeControlLeftLog() {
+            const firstRow = logBody.firstChild;
+            if (firstRow && firstRow.tagName === "TR") {
+                const codeCell = firstRow.cells[3]; // Cell index 3 is event.code
+                if (codeCell && codeCell.textContent === "ControlLeft") {
+                    logBody.removeChild(firstRow);
+                    if (logBody.children.length === 0) {
+                        logBody.innerHTML = `<tr><td colspan="6" class="empty-log">Esperando pulsaciones de teclas...</td></tr>`;
+                    }
+                }
+            }
+        }
+
+        /* -------------------------------------------------------------
+         * Keyboard Info & Card Reader Testing Functions
+         * ------------------------------------------------------------- */
+
+        function detectSystemMetadata() {
+            // Secure Context
+            const isSecure = window.isSecureContext;
+            metaSecureContext.innerHTML = isSecure 
+                ? '<span class="badge badge-active"><span class="badge-dot"></span>Sí</span>'
+                : '<span class="badge badge-inactive"><span class="badge-dot"></span>No</span>';
+
+            // Language
+            metaSysLang.textContent = navigator.language || "Desconocido";
+
+            // Browser & OS Detection
+            const userAgent = navigator.userAgent;
+            let browserName = "Desconocido";
+            let osName = "Desconocido";
+
+            if (userAgent.indexOf("Chrome") > -1) browserName = "Chrome";
+            else if (userAgent.indexOf("Safari") > -1) browserName = "Safari";
+            else if (userAgent.indexOf("Firefox") > -1) browserName = "Firefox";
+            else if (userAgent.indexOf("MSIE") > -1 || !!document.documentMode) browserName = "IE";
+            else if (userAgent.indexOf("Edge") > -1) browserName = "Edge";
+
+            if (userAgent.indexOf("Win") > -1) osName = "Windows";
+            else if (userAgent.indexOf("Mac") > -1) osName = "macOS";
+            else if (userAgent.indexOf("Linux") > -1) osName = "Linux";
+            else if (userAgent.indexOf("Android") > -1) osName = "Android";
+            else if (userAgent.indexOf("like Mac") > -1) osName = "iOS";
+
+            metaSysBrowser.textContent = browserName;
+            metaSysOs.textContent = osName;
+
+            // Keyboard Layout Map API
+            if (navigator.keyboard && navigator.keyboard.getLayoutMap) {
+                metaApiStatus.innerHTML = '<span class="badge badge-supported"><span class="badge-dot"></span>Soportado</span>';
+                navigator.keyboard.getLayoutMap().then(layoutMap => {
+                    // Detect layout type by looking at KeyQ, KeyZ, Semicolon
+                    const keyQ = layoutMap.get("KeyQ") || "q";
+                    const keyZ = layoutMap.get("KeyZ") || "z";
+                    const semicolon = layoutMap.get("Semicolon") || ";";
+
+                    let detectedLayout = "QWERTY";
+                    if (keyQ === "a" && keyZ === "w") {
+                        detectedLayout = "AZERTY";
+                    } else if (keyQ === "q" && keyZ === "y") {
+                        detectedLayout = "QWERTZ";
+                    }
+
+                    // Detect Spanish vs English based on Semicolon position
+                    if (semicolon === "ñ" || semicolon === "Ñ") {
+                        detectedLayout += " (ES)";
+                    } else if (semicolon === ";") {
+                        detectedLayout += " (US/UK)";
+                    }
+
+                    metaLayoutType.innerHTML = `<span class="badge badge-supported"><span class="badge-dot"></span>${detectedLayout}</span>`;
+                }).catch(() => {
+                    metaLayoutType.innerHTML = '<span class="badge badge-inactive"><span class="badge-dot"></span>QWERTY (Incierto)</span>';
+                });
+            } else {
+                metaApiStatus.innerHTML = '<span class="badge badge-unsupported"><span class="badge-dot"></span>No Soportado</span>';
+                metaLayoutType.innerHTML = '<span class="badge badge-inactive"><span class="badge-dot"></span>QWERTY (Asumido)</span>';
+            }
+        }
+
+        function updateModifiersState(e) {
+            if (e && typeof e.getModifierState === "function") {
+                const capsActive = e.getModifierState("CapsLock");
+                metaCapsLock.innerHTML = capsActive 
+                    ? '<span class="badge badge-active"><span class="badge-dot"></span>Activo</span>'
+                    : '<span class="badge badge-inactive"><span class="badge-dot"></span>Inactivo</span>';
+
+                const numActive = e.getModifierState("NumLock");
+                metaNumLock.innerHTML = numActive 
+                    ? '<span class="badge badge-active"><span class="badge-dot"></span>Activo</span>'
+                    : '<span class="badge badge-inactive"><span class="badge-dot"></span>Inactivo</span>';
+            }
+        }
+
+        function syncModifiers(e) {
+            if (!e) return;
+            const hasMeta = activeKeys.has("MetaLeft") || activeKeys.has("MetaRight");
+            const hasCtrl = activeKeys.has("ControlLeft") || activeKeys.has("ControlRight");
+            const hasAlt = activeKeys.has("AltLeft") || activeKeys.has("AltRight");
+            const hasShift = activeKeys.has("ShiftLeft") || activeKeys.has("ShiftRight");
+            
+            if (!hasMeta && !hasCtrl && !hasAlt && !hasShift) return;
+            
+            const checkModifier = (keyState, activeCodes, simulatedKey, simulatedKeyCode) => {
+                if (keyState === false) {
+                    activeCodes.forEach(code => {
+                        if (activeKeys.has(code)) {
+                            activeKeys.delete(code);
+                            const keyElements = document.querySelectorAll(`.key[data-code="${code}"]`);
+                            keyElements.forEach(keyEl => {
+                                keyEl.classList.add("tested");
+                                keyEl.classList.remove("active");
+                            });
+                            const simulatedEvent = {
+                                key: simulatedKey,
+                                code: code,
+                                keyCode: simulatedKeyCode,
+                                ctrlKey: e.ctrlKey || false,
+                                altKey: e.altKey || false,
+                                metaKey: e.metaKey || false
+                            };
+                            logKeyEvent("keyup", simulatedEvent);
+                        }
+                    });
+                }
+            };
+            
+            if (hasMeta && typeof e.metaKey !== "undefined") {
+                checkModifier(e.metaKey, ["MetaLeft", "MetaRight"], "Meta", 91);
+            }
+            if (hasCtrl && typeof e.ctrlKey !== "undefined") {
+                checkModifier(e.ctrlKey, ["ControlLeft", "ControlRight"], "Control", 17);
+            }
+            if (hasAlt && typeof e.altKey !== "undefined") {
+                checkModifier(e.altKey, ["AltLeft", "AltRight"], "Alt", 18);
+            }
+            if (hasShift && typeof e.shiftKey !== "undefined") {
+                checkModifier(e.shiftKey, ["ShiftLeft", "ShiftRight"], "Shift", 16);
+            }
+            
+            updateActiveKeysList();
+            updateStatistics();
+        }
+
+        // Mouse Tester Helper Audio Synthesizers
+        function playMouseClickSound() {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(3200, now);
+            osc.frequency.exponentialRampToValueAtTime(1200, now + 0.006);
+            
+            gain.gain.setValueAtTime(0.04, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.008);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.01);
+        }
+
+        function playMouseScrollSound() {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(2200, now);
+            
+            gain.gain.setValueAtTime(0.015, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.004);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.005);
+        }
+
+        // Canvas trail initialization and loop
+        function initMouseCanvas() {
+            if (!mouseTrailCanvas) return;
+            const rect = mouseTrackZone.getBoundingClientRect();
+            mouseTrailCanvas.width = rect.width;
+            mouseTrailCanvas.height = rect.height;
+        }
+
+        function animateTrail() {
+            if (!mouseTrailCanvas) return;
+            const ctx = mouseTrailCanvas.getContext("2d");
+            ctx.clearRect(0, 0, mouseTrailCanvas.width, mouseTrailCanvas.height);
+            
+            const now = performance.now();
+            trailPoints = trailPoints.filter(p => now - p.time < 400);
+            
+            if (trailPoints.length > 1) {
+                ctx.lineCap = "round";
+                ctx.lineJoin = "round";
+                
+                for (let i = 1; i < trailPoints.length; i++) {
+                    const p1 = trailPoints[i - 1];
+                    const p2 = trailPoints[i];
+                    
+                    const age1 = now - p1.time;
+                    const age2 = now - p2.time;
+                    const alpha1 = Math.max(0, 1 - age1 / 400);
+                    const alpha2 = Math.max(0, 1 - age2 / 400);
+                    const avgAlpha = (alpha1 + alpha2) / 2;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.strokeStyle = `rgba(0, 242, 254, ${avgAlpha * 0.7})`;
+                    ctx.lineWidth = 4.5 * avgAlpha;
+                    ctx.shadowBlur = 8 * avgAlpha;
+                    ctx.shadowColor = "rgba(0, 242, 254, 0.8)";
+                    ctx.stroke();
+                }
+                ctx.shadowBlur = 0;
+            }
+            
+            if (lastMoveTime > 0 && now - lastMoveTime > 120) {
+                currentSpeed = 0;
+                mouseSpeed.textContent = "Velocidad: 0 px/s";
+            }
+            
+            requestAnimationFrame(animateTrail);
+        }
+
+        const mouseButtonMap = {
+            0: { elementId: "mouse-btn-left", statusId: "status-click-left", label: "Click Izquierdo", code: "Mouse0", keyCode: 0 },
+            1: { elementId: "mouse-btn-middle", statusId: "status-click-middle", label: "Click Central", code: "Mouse1", keyCode: 1 },
+            2: { elementId: "mouse-btn-right", statusId: "status-click-right", label: "Click Derecho", code: "Mouse2", keyCode: 2 },
+            3: { elementId: "mouse-btn-back", statusId: "status-click-back", label: "Atrás (Botón 4)", code: "Mouse3", keyCode: 3 },
+            4: { elementId: "mouse-btn-forward", statusId: "status-click-forward", label: "Adelante (Botón 5)", code: "Mouse4", keyCode: 4 }
+        };
+
+        function handleMouseDown(e) {
+            syncModifiers(e);
+            const btnInfo = mouseButtonMap[e.button];
+            if (!btnInfo) return;
+            
+            e.preventDefault();
+            initAudio();
+            playMouseClickSound();
+            
+            const svgEl = document.getElementById(btnInfo.elementId);
+            const statusEl = document.getElementById(btnInfo.statusId);
+            
+            if (svgEl) {
+                svgEl.classList.add("active");
+                svgEl.classList.remove("tested");
+            }
+            if (statusEl) {
+                statusEl.classList.add("active");
+                statusEl.classList.remove("tested");
+            }
+            
+            logMouseEvent("mousedown", btnInfo);
+        }
+
+        function handleMouseUp(e) {
+            syncModifiers(e);
+            const btnInfo = mouseButtonMap[e.button];
+            if (!btnInfo) return;
+            
+            e.preventDefault();
+            
+            const svgEl = document.getElementById(btnInfo.elementId);
+            const statusEl = document.getElementById(btnInfo.statusId);
+            
+            if (svgEl) {
+                svgEl.classList.remove("active");
+                svgEl.classList.add("tested");
+            }
+            if (statusEl) {
+                statusEl.classList.remove("active");
+                statusEl.classList.add("tested");
+            }
+            
+            logMouseEvent("mouseup", btnInfo);
+        }
+
+        function handleMouseMove(e) {
+            if (!mouseTrackZone) return;
+            syncModifiers(e);
+            const rect = mouseTrackZone.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            trackPointer.style.display = "block";
+            trackPointer.style.left = `${x}px`;
+            trackPointer.style.top = `${y}px`;
+            
+            mouseCoords.textContent = `X: ${Math.round(x)} | Y: ${Math.round(y)}`;
+            
+            const now = performance.now();
+            if (lastMoveTime > 0) {
+                const dt = (now - lastMoveTime) / 1000;
+                if (dt > 0.008) {
+                    const dx = x - lastPosX;
+                    const dy = y - lastPosY;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    currentSpeed = Math.round(dist / dt);
+                    mouseSpeed.textContent = `Velocidad: ${currentSpeed} px/s`;
+                }
+            }
+            
+            trailPoints.push({ x, y, time: now });
+            
+            lastPosX = x;
+            lastPosY = y;
+            lastMoveTime = now;
+        }
+
+        function handleWheel(e) {
+            syncModifiers(e);
+            e.preventDefault();
+            initAudio();
+            
+            const now = performance.now();
+            if (now - lastScrollTime > 60) {
+                playMouseScrollSound();
+                lastScrollTime = now;
+            }
+            
+            const delta = e.deltaY;
+            if (delta === 0) return;
+            
+            const dir = delta > 0 ? "ABAJO ↓" : "ARRIBA ↑";
+            scrollDirection.textContent = dir;
+            
+            let barWidth = parseFloat(scrollBarFill.style.width || "50");
+            if (delta > 0) {
+                barWidth = Math.min(100, barWidth + 5);
+            } else {
+                barWidth = Math.max(0, barWidth - 5);
+            }
+            scrollBarFill.style.width = `${barWidth}%`;
+            
+            totalScrollSteps += (delta > 0 ? 1 : -1);
+            scrollTotal.textContent = totalScrollSteps;
+            
+            const wheelEl = document.getElementById("mouse-btn-middle");
+            if (wheelEl) {
+                wheelEl.classList.add("active");
+                setTimeout(() => {
+                    wheelEl.classList.remove("active");
+                    wheelEl.classList.add("tested");
+                }, 120);
+            }
+            
+            logScrollEvent(delta > 0 ? "ABAJO" : "ARRIBA");
+        }
+
+        function clearMouseTest() {
+            const statusIndicators = document.querySelectorAll(".status-indicator");
+            statusIndicators.forEach(el => el.classList.remove("active", "tested"));
+            
+            const mouseParts = document.querySelectorAll(".mouse-part");
+            mouseParts.forEach(el => {
+                if (!el.classList.contains("mouse-body-bg")) {
+                    el.classList.remove("active", "tested");
+                }
+            });
+            
+            totalScrollSteps = 0;
+            scrollTotal.textContent = "0";
+            scrollDirection.textContent = "-";
+            scrollBarFill.style.width = "50%";
+            
+            trailPoints = [];
+            if (mouseTrailCanvas) {
+                const ctx = mouseTrailCanvas.getContext("2d");
+                ctx.clearRect(0, 0, mouseTrailCanvas.width, mouseTrailCanvas.height);
+            }
+        }
+
+        function logMouseEvent(actionType, btnInfo) {
+            const placeholder = logBody.querySelector(".empty-log");
+            if (placeholder) {
+                logBody.innerHTML = "";
+            }
+            
+            const row = document.createElement("tr");
+            const timestamp = new Date().toLocaleTimeString(undefined, {
+                hour12: false, 
+                hour: "2-digit", 
+                minute: "2-digit", 
+                second: "2-digit",
+                fractionalSecondDigits: 3
+            });
+            
+            const actionClass = actionType === "mousedown" ? "log-action-down" : "log-action-up";
+            const actionLabel = actionType === "mousedown" ? "▼ CLIC ABAJO" : "▲ CLIC ARRIBA";
+            
+            row.innerHTML = `
+                <td class="${actionClass}">${actionLabel}</td>
+                <td style="font-weight: 600; color: var(--color-active);">${btnInfo.label}</td>
+                <td>${btnInfo.code}</td>
+                <td>${btnInfo.code}</td>
+                <td>${btnInfo.keyCode}</td>
+                <td style="color: var(--text-secondary);">${timestamp}</td>
+            `;
+            
+            logBody.insertBefore(row, logBody.firstChild);
+            
+            if (logBody.children.length > 50) {
+                logBody.removeChild(logBody.lastChild);
+            }
+        }
+
+        function logScrollEvent(dir) {
+            const placeholder = logBody.querySelector(".empty-log");
+            if (placeholder) {
+                logBody.innerHTML = "";
+            }
+            
+            const row = document.createElement("tr");
+            const timestamp = new Date().toLocaleTimeString(undefined, {
+                hour12: false, 
+                hour: "2-digit", 
+                minute: "2-digit", 
+                second: "2-digit",
+                fractionalSecondDigits: 3
+            });
+            
+            row.innerHTML = `
+                <td style="color: var(--color-special);">🌀 SCROLL</td>
+                <td style="font-weight: 600; color: var(--color-special);">Ruleta ${dir}</td>
+                <td>Wheel${dir}</td>
+                <td>WheelDelta</td>
+                <td>-</td>
+                <td style="color: var(--text-secondary);">${timestamp}</td>
+            `;
+            
+            logBody.insertBefore(row, logBody.firstChild);
+            
+            if (logBody.children.length > 50) {
+                logBody.removeChild(logBody.lastChild);
+            }
+        }
+
+        function handleKeyDown(e) {
+            initAudio();
+            syncModifiers(e);
+            updateModifiersState(e);
+
+            const keysToBlock = [
+                "Enter", "NumpadEnter", "Tab", "Alt", "ContextMenu", "Backspace", "Space", " ",
+                "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
+                "PageUp", "PageDown", "Home", "End",
+                "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"
+            ];
+            
+            if (keysToBlock.includes(e.key) || 
+                keysToBlock.includes(e.code) || 
+                e.ctrlKey || 
+                e.altKey || 
+                e.metaKey) {
+                e.preventDefault();
+            }
+
+            const code = e.code;
+            
+            // Auto-release Meta key because keyup is often intercepted by the OS
+            if (code === "MetaLeft" || code === "MetaRight") {
+                setTimeout(() => {
+                    if (activeKeys.has(code)) {
+                        activeKeys.delete(code);
+                        const keyElements = document.querySelectorAll(`.key[data-code="${code}"]`);
+                        keyElements.forEach(keyEl => {
+                            keyEl.classList.add("tested");
+                            keyEl.classList.remove("active");
+                        });
+                        updateActiveKeysList();
+                        updateStatistics();
+                        
+                        // Log a simulated keyup to keep history clean
+                        const simulatedEvent = {
+                            key: e.key,
+                            code: e.code,
+                            keyCode: e.keyCode,
+                            ctrlKey: e.ctrlKey,
+                            altKey: e.altKey,
+                            metaKey: false
+                        };
+                        logKeyEvent("keyup", simulatedEvent);
+                    }
+                }, 600);
+            }
+            
+            // Track timing for AltGr (which sends ControlLeft + AltRight on Windows)
+            if (code === "ControlLeft") {
+                lastControlLeftTime = performance.now();
+            }
+            
+            // Check for AltGr side-effect on Windows
+            if (code === "AltRight" && (performance.now() - lastControlLeftTime < 50)) {
+                wasControlLeftSuppressed = true;
+                activeKeys.delete("ControlLeft");
+                testedKeys.delete("ControlLeft");
+                
+                // Remove active and tested classes from Ctrl Left UI keycap
+                const ctrlElements = document.querySelectorAll('.key[data-code="ControlLeft"]');
+                ctrlElements.forEach(el => {
+                    el.classList.remove("active", "tested");
+                });
+                
+                // Remove keydown log for ControlLeft
+                removeControlLeftLog();
+            }
+
+            const isNewPress = !activeKeys.has(code);
+            
+            activeKeys.add(code);
+            testedKeys.add(code);
+            
+            if (isNewPress) {
+                // Suppress sound for AltRight if it's AltGr to avoid double clicking
+                let suppressSound = false;
+                if (code === "AltRight" && wasControlLeftSuppressed) {
+                    suppressSound = true;
+                }
+                if (!suppressSound) {
+                    playSwitchSound();
+                }
+                logKeyEvent("keydown", e);
+            }
+            
+            const keyElements = document.querySelectorAll(`.key[data-code="${code}"]`);
+            keyElements.forEach(keyEl => {
+                keyEl.classList.add("active");
+                keyEl.classList.add("tested");
+            });
+            
+            updateActiveKeysList();
+            updateStatistics();
+        }
+
+        function handleKeyUp(e) {
+            syncModifiers(e);
+            updateModifiersState(e);
+
+            const keysToBlock = [
+                "Enter", "NumpadEnter", "Tab", "Alt", "ContextMenu", "Backspace", "Space", " ",
+                "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
+                "PageUp", "PageDown", "Home", "End",
+                "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"
+            ];
+            if (keysToBlock.includes(e.key) || keysToBlock.includes(e.code) || e.ctrlKey || e.altKey || e.metaKey) {
+                e.preventDefault();
+            }
+
+            const code = e.code;
+            
+            // If ControlLeft was suppressed on keydown (due to AltGr), skip its keyup logic
+            if (code === "ControlLeft" && wasControlLeftSuppressed) {
+                wasControlLeftSuppressed = false;
+                return;
+            }
+
+            // Soporte robusto para teclas que solo disparan keyup o donde keydown fue interrumpido (ej. PrintScreen)
+            const wasActive = activeKeys.has(code);
+            activeKeys.delete(code);
+            
+            if (!testedKeys.has(code)) {
+                testedKeys.add(code);
+                if (!wasActive) {
+                    playSwitchSound();
+                    logKeyEvent("keydown", e);
+                }
+            }
+            
+            logKeyEvent("keyup", e);
+
+            const keyElements = document.querySelectorAll(`.key[data-code="${code}"]`);
+            keyElements.forEach(keyEl => {
+                keyEl.classList.add("tested");
+                keyEl.classList.remove("active");
+            });
+
+            updateActiveKeysList();
+            updateStatistics();
+        }
+
+        function resetTester() {
+            activeKeys.clear();
+            testedKeys.clear();
+            maxRollover = 0;
+            
+            const keys = document.querySelectorAll(".key");
+            keys.forEach(k => {
+                k.classList.remove("active", "tested");
+            });
+            
+            logBody.innerHTML = `<tr><td colspan="6" class="empty-log">Esperando pulsaciones de teclas...</td></tr>`;
+            updateActiveKeysList();
+            updateStatistics();
+        }
+
+        function updateActiveKeysList() {
+            activeKeysList.innerHTML = "";
+            if (activeKeys.size === 0) {
+                activeKeysList.innerHTML = `<span class="empty-list">Ninguna tecla pulsada</span>`;
+                return;
+            }
+            
+            activeKeys.forEach(code => {
+                const keyTag = document.createElement("span");
+                keyTag.className = "key-tag";
+                const keyEl = document.querySelector(`.key[data-code="${code}"]`);
+                let label = code;
+                if (keyEl) {
+                    const primaryLabel = keyEl.querySelector(".key-label-primary");
+                    if (primaryLabel) label = primaryLabel.textContent;
+                }
+                keyTag.textContent = label;
+                activeKeysList.appendChild(keyTag);
+            });
+        }
+
+        function updateStatistics() {
+            statPressedCount.textContent = activeKeys.size;
+            
+            if (activeKeys.size > maxRollover) {
+                maxRollover = activeKeys.size;
+                statRolloverMax.textContent = maxRollover;
+            }
+            
+            if (totalLayoutKeysCount > 0) {
+                const totalUniqueTested = Array.from(testedKeys).filter(code => {
+                    return code !== "Fn" && document.querySelector(`.key[data-code="${code}"]`) !== null;
+                }).length;
+                const pct = Math.round((totalUniqueTested / totalLayoutKeysCount) * 100);
+                statTestedPct.textContent = `${pct}%`;
+            } else {
+                statTestedPct.textContent = "0%";
+            }
+        }
+
+        function logKeyEvent(type, event) {
+            const placeholder = logBody.querySelector(".empty-log");
+            if (placeholder) {
+                logBody.innerHTML = "";
+            }
+            
+            const row = document.createElement("tr");
+            const timestamp = new Date().toLocaleTimeString(undefined, {
+                hour12: false, 
+                hour: "2-digit", 
+                minute: "2-digit", 
+                second: "2-digit",
+                fractionalSecondDigits: 3
+            });
+            
+            let keyLabel = event.code;
+            const keyEl = document.querySelector(`.key[data-code="${event.code}"]`);
+            if (keyEl) {
+                const primaryLabel = keyEl.querySelector(".key-label-primary");
+                if (primaryLabel) keyLabel = primaryLabel.textContent;
+            }
+            
+            const actionClass = type === "keydown" ? "log-action-down" : "log-action-up";
+            const actionLabel = type === "keydown" ? "▼ PRESIONADA" : "▲ SOLTADA";
+
+            row.innerHTML = `
+                <td class="${actionClass}">${actionLabel}</td>
+                <td style="font-weight: 600;">${keyLabel}</td>
+                <td>${event.key === " " ? "Space" : event.key}</td>
+                <td>${event.code}</td>
+                <td>${event.keyCode}</td>
+                <td style="color: var(--text-secondary);">${timestamp}</td>
+            `;
+            
+            logBody.insertBefore(row, logBody.firstChild);
+            
+            if (logBody.children.length > 50) {
+                logBody.removeChild(logBody.lastChild);
+            }
+        }
+
+        function clearLog() {
+            logBody.innerHTML = `<tr><td colspan="6" class="empty-log">Esperando pulsaciones de teclas...</td></tr>`;
+        }
+
+        window.addEventListener("keydown", handleKeyDown);
+        window.addEventListener("keyup", handleKeyUp);
+
+        layoutSelect.addEventListener("change", (e) => {
+            renderKeyboard(e.target.value);
+            layoutSelect.blur();
+        });
+
+        soundSelect.addEventListener("change", (e) => {
+            initAudio();
+            switchSoundType = e.target.value;
+            soundSelect.blur();
+        });
+
+        btnReset.addEventListener("click", () => {
+            resetTester();
+            btnReset.blur();
+        });
+
+        btnClearLog.addEventListener("click", () => {
+            clearLog();
+            btnClearLog.blur();
+        });
+
+        document.addEventListener("click", () => {
+            initAudio();
+        }, { once: false });
+
+        btnCloseAudioBanner.addEventListener("click", (e) => {
+            e.stopPropagation();
+            audioBanner.style.opacity = "0";
+            setTimeout(() => audioBanner.remove(), 300);
+        });
+
+        window.addEventListener("blur", () => {
+            activeKeys.clear();
+            const activeKeycaps = document.querySelectorAll(".key.active");
+            activeKeycaps.forEach(k => k.classList.remove("active"));
+            updateActiveKeysList();
+            updateStatistics();
+        });
+
+        window.addEventListener("focus", () => {
+            activeKeys.clear();
+            const activeKeycaps = document.querySelectorAll(".key.active");
+            activeKeycaps.forEach(k => k.classList.remove("active"));
+            updateActiveKeysList();
+            updateStatistics();
+        });
+
+        // Initial setup
+        renderKeyboard(layoutSelect.value);
+        detectSystemMetadata();
+
+        // Initialize Mouse Canvas & Animation Trail Loop
+        if (mouseTrackZone && mouseTrailCanvas) {
+            initMouseCanvas();
+            animateTrail();
+            
+            // Resize listener for canvas
+            window.addEventListener("resize", initMouseCanvas);
+            
+            // Mouse movement inside the tracking zone
+            mouseTrackZone.addEventListener("mousemove", handleMouseMove);
+            
+            mouseTrackZone.addEventListener("mouseleave", () => {
+                trackPointer.style.display = "none";
+                mouseCoords.textContent = "X: - | Y: -";
+                mouseSpeed.textContent = "Velocidad: 0 px/s";
+            });
+        }
+
+        // Bind clicks & scroll to the mouse tester card
+        const mouseCard = document.querySelector(".mouse-card");
+        if (mouseCard) {
+            mouseCard.addEventListener("mousedown", handleMouseDown);
+            mouseCard.addEventListener("mouseup", handleMouseUp);
+            mouseCard.addEventListener("contextmenu", (e) => e.preventDefault());
+            mouseCard.addEventListener("wheel", handleWheel, { passive: false });
+        }
+
+        // Clear button
+        if (btnClearMouse) {
+            btnClearMouse.addEventListener("click", () => {
+                clearMouseTest();
+                btnClearMouse.blur();
+            });
+        }
+    </script>
+</body>
+</html>
